@@ -2,20 +2,10 @@ import os
 import hashlib
 import json
 import requests
-
-# settings.py
-from dotenv import load_dotenv
+from settings import load_dotenv
+from caesar_cipher import CaesarCipher
 
 load_dotenv()
-
-# OR, the same with increased verbosity:
-load_dotenv(verbose=True)
-
-# OR, explicitly providing path to '.env'
-from pathlib import Path  # python3 onlys
-
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
 
 TOKEN = os.getenv('TOKEN')
 API_URL_REQUEST = 'https://api.codenation.dev/v1/challenge/dev-ps/generate-data'
@@ -30,14 +20,7 @@ def decode(message: dict):
         shift = int(message.get('numero_casas'))
         ciphertext = str(message.get('cifrado')).lower()
 
-        plaintext = ''
-        for char in ciphertext:
-            if char.isalpha():
-                index = LETTERS.index(char)
-                plaintext += LETTERS[index - shift]
-            else:
-                plaintext += char
-
+        plaintext = CaesarCipher.decrypt(ciphertext, shift)
         message['decifrado'] = plaintext
 
         encrypttext = hashlib.sha1(plaintext.encode('utf-8')).hexdigest()
@@ -91,4 +74,5 @@ def main():
     post_json_to_api(TOKEN)
 
 
-main()
+if __name__ == '__main__':
+    main()
